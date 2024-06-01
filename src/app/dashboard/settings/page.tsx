@@ -5,20 +5,14 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import { useAppDispatch, useAppSelector } from "@/store";
-import { useRouter } from "next/navigation";
 import { CircularProgress } from "@mui/material";
-import { updateSettings } from "@/store/wallet";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { fetchSettings, updateSettings } from "@/store/wallet";
 
-export default function OnBoard() {
-  const router = useRouter();
+export default function Settings() {
   const [rsvpType, setRsvpType] = useState(0);
   const [coolDownType, setCoolDownType] = useState(0);
   const [rsvpProtection, setRsvpProtection] = useState(0);
-  const isInit = useAppSelector((state) => state.wallet.isInit);
-  const address = useAppSelector((state) => state.wallet.address);
-  const dispatch = useAppDispatch();
-
   const [day, setDay] = useState(0);
   const [hour, setHr] = useState("");
   const [email, setEmail] = useState("");
@@ -26,28 +20,29 @@ export default function OnBoard() {
   const [hourA, setHrA] = useState("");
   const [minuiteA, setMinuiteA] = useState("");
   const [isLoading, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
+
+  const settingsData = useAppSelector((state) => state.wallet.settings);
 
   useEffect(() => {
-    if (address == "") {
-      window.location.replace("/");
-    }
-    if (isInit) {
-      router.replace("/dashboard");
-    }
+    dispatch(fetchSettings());
   }, []);
 
+  useEffect(() => {
+    if (settingsData?.rsvpData?.rsvpType) {
+      setRsvpType(settingsData?.rsvpData?.rsvpType == "Daily" ? 0 : 1);
+      setDay(settingsData.rsvpData.day);
+      setHr(settingsData.rsvpData.hour);
+      setMinuite(settingsData.rsvpData.minuite);
+      setEmail(settingsData.email);
+    }
+  }, [settingsData]);
+
   return (
-    <div className="min-h-screen w-full flex flex-col items-center p-6 select-none">
-      <span className="text-xl font-semibold mb-2">Welcome to</span>
-      <span className="text-2xl font-bold font-[IdentifyDemoRegular]">
-        EternaTrust
-      </span>
-      <div className="border rounded-md w-[50%] p-6 mt-14">
-        <span className="text-xl font-semibold">
-          ⚙️ Let's configure your prefrences
-        </span>
+    <div>
+      <div>
         <div className="mt-4">
-          <span className="text-lg">Mode of notification:</span>
+          <span className="text-lg font-semibold">Mode of notification:</span>
           <div className="text-lg ">
             <div>
               <input
@@ -63,9 +58,9 @@ export default function OnBoard() {
               <input
                 type="checkbox"
                 id="mode-email"
+                readOnly
                 name="mode-email"
                 disabled
-                readOnly
                 checked={false}
               />
               <label for="mode-email">Discord (Coming Soon)</label>
@@ -73,7 +68,7 @@ export default function OnBoard() {
           </div>
         </div>
         <div className="mt-4">
-          <span className="text-lg">Email Address:</span>
+          <span className="text-lg font-semibold">Email Address:</span>
           <div>
             <input
               type="email"
@@ -84,7 +79,7 @@ export default function OnBoard() {
           </div>
         </div>
         <div className="mt-4">
-          <span className="text-lg">RSVP Schedule:</span>
+          <span className="text-lg font-semibold">RSVP Schedule:</span>
           <div className="my-2">
             <FormControl>
               <Select
@@ -151,23 +146,23 @@ export default function OnBoard() {
           <div>
             <input
               type="number"
+              value={hour}
+              onChange={(e) => setHr(e.target.value)}
               className="bg-black border px-2 p-1 rounded-lg outline-none focus:border-[#0093E9]"
               placeholder="Hour"
-              value={hour}
-              onChange={(e: any) => setHr(e.target.value)}
             />
             <span className="text-lg font-semibold mx-2">:</span>
             <input
               type="number"
+              value={minuite}
+              onChange={(e) => setMinuite(e.target.value)}
               className="bg-black border px-2 p-1 rounded-lg outline-none focus:border-[#0093E9]"
               placeholder="Minute"
-              value={minuite}
-              onChange={(e: any) => setMinuite(e.target.value)}
             />
           </div>
         </div>
         <div className="mt-4">
-          <span className="text-lg">Execute will if:</span>
+          <span className="text-lg font-semibold">Execute will if:</span>
           <div className="flex items-center">
             <span className="mr-2">RSVP not answered till - </span>
             <FormControl>
@@ -191,7 +186,7 @@ export default function OnBoard() {
                   },
                 }}
                 value={coolDownType}
-                onChange={(e: any) => setCoolDownType(e.target.value)}
+                onChange={(e) => setCoolDownType(e.target.value)}
               >
                 <MenuItem value={0}>next rsvp</MenuItem>
                 <MenuItem value={1}>following timeline</MenuItem>
@@ -202,25 +197,27 @@ export default function OnBoard() {
             <div className="mt-2">
               <input
                 type="number"
+                value={hourA}
+                onChange={(e) => setHrA(e.target.value)}
                 className="bg-black border px-2 p-1 rounded-lg outline-none focus:border-[#0093E9]"
                 placeholder="Hour"
-                value={hourA}
-                onChange={(e: any) => setHrA(e.target.value)}
               />
               <span className="text-lg font-semibold mx-2">:</span>
               <input
                 type="number"
+                value={minuiteA}
+                onChange={(e) => setMinuiteA(e.target.value)}
                 className="bg-black border px-2 p-1 rounded-lg outline-none focus:border-[#0093E9]"
                 placeholder="Minute"
-                value={minuiteA}
-                onChange={(e: any) => setMinuiteA(e.target.value)}
               />
             </div>
           )}
         </div>
         {false && (
           <div className="mt-4">
-            <span className="text-lg">RSVP protection method:</span>
+            <span className="text-lg font-semibold">
+              RSVP protection method:
+            </span>
             <div>
               <FormControl>
                 <Select
@@ -288,7 +285,6 @@ export default function OnBoard() {
                 })
               );
               setLoading(false);
-              router.replace("/dashboard");
             }}
             className="gradient-bg p-2 px-4 rounded-md font-semibold active:scale-90"
           >

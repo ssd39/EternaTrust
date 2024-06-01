@@ -9,14 +9,28 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@apollo/client": "^3.10.4",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@fontsource/roboto": "^5.0.13",
+    "@lit-protocol/lit-node-client": "6.0.0-beta.4",
+    "@lit-protocol/lit-auth-client": "6.0.0-beta.4",
+    "@lit-protocol/auth-helpers": "6.0.0-beta.4",
+    "@lit-protocol/types": "6.0.0-beta.4",
     "@mui/icons-material": "^5.15.18",
     "@mui/material": "^5.15.18",
+    "@reduxjs/toolkit": "^2.2.5",
+    "clsx": "^2.1.1",
+    "ethers": "^6.12.1",
+    "framer-motion": "^11.2.9",
+    "graphql": "^16.8.1",
+    "mini-svg-data-uri": "^1.4.4",
     "next": "14.2.3",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "react-redux": "^9.1.2",
+    "react-toastify": "^10.0.5",
+    "tailwind-merge": "^2.3.0"
   },
   "devDependencies": {
     "@types/node": "^20",
