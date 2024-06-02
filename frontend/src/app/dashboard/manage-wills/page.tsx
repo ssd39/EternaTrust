@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -9,7 +9,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import { CircularProgress, FormControl, MenuItem, Select } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "@/store";
-import { addWill, fetchAssets } from "@/store/wallet";
+import { addWill, fetchAssets, fetchWill, fetchWills } from "@/store/wallet";
+import { useRouter } from "next/navigation";
 
 const dropdownSx = {
   color: "black",
@@ -29,22 +30,54 @@ const dropdownSx = {
     color: "black",
   },
 };
+
+const weeks = [
+  "sunday",
+  "monday",
+  "tuseday",
+  "wednesday",
+  "thursday",
+  "friday",
+];
+const RenderSchedule = ({ schedule }: { schedule: string }) => {
+  const sObj: any = JSON.parse(schedule);
+  return (
+    <>
+      {sObj.rsvpType == "Daily"
+        ? "Daily at " + sObj.hour + "h " + sObj.minuite + "m"
+        : "Weekly on" +
+          weeks[sObj.day] +
+          " at " +
+          sObj.hour +
+          "h " +
+          sObj.minuite +
+          "m"}
+    </>
+  );
+};
+
 export default function ManageWills() {
   const [showDialog, setShowDialog] = useState(false);
   const [nItemTyp, setNitemTyp] = useState(0);
   const [message, setMessage] = useState("");
   const [bEmail, setBEmail] = useState("");
   const [bAddress, setBAddress] = useState("");
-  const [addWillData, setAddWillData] = useState<any>([]);
+  const [addWillData, setAddWillData] = useState<Array<any>>([]);
   const [isAdding, setAdding] = useState(false);
+  const [isLoading, setLoading] = useState(false);
   const assets = useAppSelector((state) => state.wallet.assets).map(
     (val) => val.assetData
   );
-
+  const address = useAppSelector((state) => state.wallet.address);
+  const wills = useAppSelector((state) => state.wallet.wills);
+  const router = useRouter();
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(fetchAssets());
+
+    setLoading(true);
+    dispatch(fetchWills()).finally(() => setLoading(false));
   }, []);
 
   return (
@@ -280,19 +313,26 @@ export default function ManageWills() {
                   if (isAdding) {
                     return;
                   }
-                  setAdding(true)
-                  await dispatch(addWill({
-                    bEmail,
-                    bAddress,
-                    message,
-                    willData: addWillData
-                  }))
-                  setAdding(false)
+                  setAdding(true);
+
+                  await dispatch(
+                    addWill(
+                      //@ts-ignore
+                      {
+                        bEmail,
+                        bAddress,
+                        message,
+                        willData: addWillData,
+                      }
+                    )
+                  );
+                  setAdding(false);
+                  setShowDialog(false);
                 }}
                 className="text-white gradient-bg p-2 px-4 rounded-md font-semibold active:scale-90"
               >
                 {isAdding ? (
-                  <CircularProgress sx={{ color: "text-white" }} />
+                  <CircularProgress sx={{ color: "white" }} />
                 ) : (
                   <>
                     <AddIcon /> Add
@@ -309,6 +349,57 @@ export default function ManageWills() {
       >
         <AddIcon /> Add Will
       </button>
+      {isLoading && (
+        <div className="my-5 w-full flex items-center justify-center">
+          <CircularProgress sx={{ color: "white" }} />
+        </div>
+      )}
+      <div className="w-full mt-4 flex flex-wrap">
+        {wills.map((val, i) => {
+          return (
+            <div className="p-4 bg-white rounded-lg flex flex-col m-2">
+              <div>
+                <span className="text-white font-bold italic text-lg p-2 bg-black rounded-full">
+                  #Will {parseInt(val.willId) + 1}
+                </span>
+              </div>
+              <div className="mt-2">
+                <span className="font-bold text-black mt-2">
+                  <span className="italic text-[#0093E9] mr-2">
+                    RSVP schedule:
+                  </span>
+                  <RenderSchedule schedule={val.schedule} />
+                </span>
+              </div>
+              <span className="font-bold text-black mt-1">
+                <span className="italic text-[#0093E9] mr-2">Tx Hash:</span>{" "}
+                <a
+                  className="underline "
+                  href={`https://sepolia.etherscan.io/tx/${val.transactionHash}`}
+                >
+                  {val.transactionHash.slice(0, 44)}...
+                </a>
+              </span>
+              <div className="flex justify-between mt-1">
+                <span className=" text-black font-semibold">
+                  <span className="italic font-bold text-[#0093E9] mr-2">
+                    Added At:
+                  </span>
+                  {new Date(parseInt(val.blockTimestamp) * 1000).toDateString()}
+                </span>
+                <button
+                  onClick={() => {
+                    router.push(`/will/${address}/${val.willId}`);
+                  }}
+                  className="mt-2 gradient-bg p-2 px-4 rounded-md font-semibold active:scale-90"
+                >
+                  View
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

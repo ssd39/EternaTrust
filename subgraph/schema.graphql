@@ -1,0 +1,38 @@
+type AssetAdded @entity(immutable: true) {
+  id: Bytes!
+  indexId: BigInt! # uint256
+  owner: Bytes! # address
+  assetData: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RsvpAdded @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  timestamp: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type SettingsUpdated @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  ipfsHash: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type WillCreated @entity(immutable: true) {
+  id: Bytes!
+  willId: BigInt! # uint256
+  creator: Bytes! # address
+  willData: String! # string
+  schedule: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}

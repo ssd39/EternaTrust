@@ -1,0 +1,35 @@
+specVersion: 1.0.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: EternaTrust
+    network: sepolia
+    source:
+      address: "0xc2ae523aef1f3cc3e7fbc1d4625c5894e991a8f1"
+      abi: EternaTrust
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - AssetAdded
+        - RsvpAdded
+        - SettingsUpdated
+        - WillCreated
+      abis:
+        - name: EternaTrust
+          file: ./abis/EternaTrust.json
+      eventHandlers:
+        - event: AssetAdded(uint256,indexed address,string)
+          handler: handleAssetAdded
+        - event: RsvpAdded(indexed address,uint256)
+          handler: handleRsvpAdded
+        - event: SettingsUpdated(indexed address,string)
+          handler: handleSettingsUpdated
+        - event: WillCreated(uint256,indexed address,string,string)
+          handler: handleWillCreated
+      file: ./src/eterna-trust.ts
